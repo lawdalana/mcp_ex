@@ -1,0 +1,2 @@
+"""Math MCP server package."""
+
