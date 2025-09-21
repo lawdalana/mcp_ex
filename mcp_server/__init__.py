@@ -1,2 +1,0 @@
-"""Example MCP server implementations."""
-

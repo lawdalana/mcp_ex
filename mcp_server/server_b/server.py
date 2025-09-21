@@ -1,44 +1,38 @@
-"""Weather MCP server built on the lightweight MCP utilities."""
-from __future__ import annotations
+"""
+FastMCP quickstart example.
 
-from typing import Any
+cd to the `examples/snippets/clients` directory and run:
+    uv run server fastmcp_quickstart stdio
+"""
 
-from mcp import MCPServer
+from mcp.server.fastmcp import FastMCP
 
-WEATHER_DATA: dict[str, dict[str, Any]] = {
-    "london": {"condition": "cloudy", "temperature_c": 16.0},
-    "new york": {"condition": "sunny", "temperature_c": 22.0},
-    "los angeles": {"condition": "clear", "temperature_c": 24.0},
-}
-
-server = MCPServer("Weather Toolkit")
+# Create an MCP server
+mcp = FastMCP("Demo")
 
 
-def _convert_temperature(value_c: float, unit: str) -> float:
-    if unit == "fahrenheit":
-        return round((value_c * 9 / 5) + 32, 1)
-    return value_c
+# Add an addition tool
+@mcp.tool()
+def add(a: int, b: int) -> int:
+    """Add two numbers"""
+    return a + b
 
 
-@server.tool(name="current_weather")
-async def current_weather(location: str, unit: str = "celsius") -> dict[str, Any]:
-    normalized = location.strip().lower()
-    if normalized not in WEATHER_DATA:
-        raise ValueError(f"Weather data for '{location}' is not available")
+# Add a dynamic greeting resource
+@mcp.resource("greeting://{name}")
+def get_greeting(name: str) -> str:
+    """Get a personalized greeting"""
+    return f"Hello, {name}!"
 
-    entry = WEATHER_DATA[normalized]
-    temperature = _convert_temperature(entry["temperature_c"], unit)
-    return {
-        "location": location.title(),
-        "condition": entry["condition"],
-        "temperature": temperature,
-        "unit": unit,
+
+# Add a prompt
+@mcp.prompt()
+def greet_user(name: str, style: str = "friendly") -> str:
+    """Generate a greeting prompt"""
+    styles = {
+        "friendly": "Please write a warm, friendly greeting",
+        "formal": "Please write a formal, professional greeting",
+        "casual": "Please write a casual, relaxed greeting",
     }
 
-
-app = server.app
-
-
-if __name__ == "__main__":  # pragma: no cover - manual run helper
-    server.run(host="0.0.0.0", port=8002)
-
+    return f"{styles.get(style, styles['friendly'])} for someone named {name}."

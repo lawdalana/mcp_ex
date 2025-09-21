@@ -1,2 +1,0 @@
-"""Weather MCP server package."""
-
